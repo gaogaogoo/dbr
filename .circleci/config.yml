@@ -19,7 +19,7 @@ jobs:
         environment:
           - ACCEPT_EULA=Y
           - SA_PASSWORD=qwe123QWE
-    working_directory: /go/src/github.com/gocraft/dbr
+    working_directory: /go/src/github.com/gaogaogoo/dbr
     steps:
       - run: |
           curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
