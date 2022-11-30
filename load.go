@@ -2,6 +2,7 @@ package dbr
 
 import (
 	"database/sql"
+	"github.com/gaogaogoo/dbr/v2/convert"
 	"reflect"
 )
 
@@ -62,6 +63,12 @@ func Load(rows *sql.Rows, value interface{}) (int, error) {
 	s := newTagStore()
 	count := 0
 	for rows.Next() {
+		//++++++++++
+		values, err := scanValues(rows, len(column))
+		if err != nil {
+			return 0, err
+		}
+
 		var elem, keyElem reflect.Value
 
 		if elemType != nil {
@@ -98,10 +105,30 @@ func Load(rows *sql.Rows, value interface{}) (int, error) {
 				ptr[i] = dummyDest
 			}
 		}
-		err = rows.Scan(ptr...)
-		if err != nil {
-			return 0, err
+
+		//----------
+		//err = rows.Scan(ptr...)
+		//if err != nil {
+		//	return 0, err
+		//}
+
+		//++++++++++
+		for i, v := range values {
+			reflectValue := reflect.ValueOf(v).Elem().Interface()
+			p := ptr[i]
+			if reflectValue != nil {
+				if err = convert.ConvertAssign(p, reflectValue); err != nil {
+					return 0, err
+				}
+			} else {
+				if _, ok := p.(sql.Scanner); ok {
+					if err = convert.ConvertAssign(p, reflectValue); err != nil {
+						return 0, err
+					}
+				}
+			}
 		}
+
 		for i := range ptr {
 			ptr[i] = nil
 		}
@@ -123,6 +150,21 @@ func Load(rows *sql.Rows, value interface{}) (int, error) {
 		}
 	}
 	return count, rows.Err()
+}
+
+// ++++++++++
+func scanValues(rows *sql.Rows, columnCount int) ([]interface{}, error) {
+	list := make([]interface{}, 0, columnCount)
+	for i := 0; i < columnCount; i++ {
+		var value interface{}
+		list = append(list, &value)
+	}
+
+	err := rows.Scan(list...)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 func reflectAlloc(typ reflect.Type) reflect.Value {
