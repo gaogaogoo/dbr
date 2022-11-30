@@ -216,3 +216,25 @@ func query(ctx context.Context, runner Runner, log EventReceiver, builder Builde
 	}
 	return count, nil
 }
+
+// ++++++++++
+func queryRow(ctx context.Context, runner Runner, log EventReceiver, builder Builder, d Dialect, dest ...interface{}) error {
+	timeout := runner.GetTimeout()
+	if timeout > 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	query, rows, err := queryRows(ctx, runner, log, builder, d)
+	if err != nil {
+		return err
+	}
+	err = LoadRow(rows, dest...)
+	if err != nil {
+		return log.EventErrKv("dbr.select.load.scan", err, kvs{
+			"sql": query,
+		})
+	}
+	return nil
+}

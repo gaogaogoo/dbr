@@ -124,6 +124,16 @@ func TestBasicCRUD(t *testing.T) {
 		require.Equal(t, int64(1), rowsAffected)
 
 		require.True(t, jonathan.Id > 0)
+
+		var id int64
+		var name string
+		var email string
+		err = sess.Select("*").From("dbr_people").Where(Eq("id", jonathan.Id)).LoadRow(&id, &name, &email)
+		require.NoError(t, err)
+		require.Equal(t, jonathan.Id, id)
+		require.Equal(t, jonathan.Name, name)
+		require.Equal(t, jonathan.Email, email)
+
 		// select
 		var people []dbrPerson
 		count, err := sess.Select("*").From("dbr_people").Where(Eq("id", jonathan.Id)).Load(&people)

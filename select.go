@@ -441,6 +441,11 @@ func (b *SelectStmt) Load(value interface{}) (int, error) {
 	return b.LoadContext(context.Background(), value)
 }
 
+// ++++++++++
+func (b *SelectBuilder) LoadRow(values ...interface{}) error {
+	return queryRow(context.Background(), b.Runner, b.EventReceiver, b, b.Dialect, values...)
+}
+
 // Iterate executes the query and returns the Iterator, or any error encountered.
 func (b *SelectStmt) Iterate() (Iterator, error) {
 	return b.IterateContext(context.Background())

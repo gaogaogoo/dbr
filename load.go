@@ -113,20 +113,9 @@ func Load(rows *sql.Rows, value interface{}) (int, error) {
 		//}
 
 		//++++++++++
-		for i, v := range values {
-			reflectValue := reflect.ValueOf(v).Elem().Interface()
-			p := ptr[i]
-			if reflectValue != nil {
-				if err = convert.ConvertAssign(p, reflectValue); err != nil {
-					return 0, err
-				}
-			} else {
-				if _, ok := p.(sql.Scanner); ok {
-					if err = convert.ConvertAssign(p, reflectValue); err != nil {
-						return 0, err
-					}
-				}
-			}
+		err = convertValuesToPtr(ptr, values)
+		if err != nil {
+			return 0, err
 		}
 
 		for i := range ptr {
@@ -150,6 +139,53 @@ func Load(rows *sql.Rows, value interface{}) (int, error) {
 		}
 	}
 	return count, rows.Err()
+}
+
+// ++++++++++
+func LoadRow(rows *sql.Rows, dest ...interface{}) error {
+	defer rows.Close()
+
+	for _, val := range dest {
+		v := reflect.ValueOf(val)
+		if v.Kind() != reflect.Ptr || v.IsNil() {
+			return ErrInvalidPointer
+		}
+	}
+
+	if rows.Next() {
+		values, err := scanValues(rows, len(dest))
+		if err != nil {
+			return err
+		}
+
+		err = convertValuesToPtr(dest, values)
+		if err != nil {
+			return err
+		}
+	} else {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// ++++++++++
+func convertValuesToPtr(dest, src []interface{}) error {
+	for i, v := range src {
+		reflectValue := reflect.ValueOf(v).Elem().Interface()
+		p := dest[i]
+		if reflectValue != nil {
+			if err := convert.ConvertAssign(p, reflectValue); err != nil {
+				return err
+			}
+		} else {
+			if _, ok := p.(sql.Scanner); ok {
+				if err := convert.ConvertAssign(p, reflectValue); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // ++++++++++
