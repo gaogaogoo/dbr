@@ -207,11 +207,11 @@ func (n *NullTime) Scan(value interface{}) error {
 		n.Time, n.Valid = v, true
 		return nil
 	case []byte:
-		n.Time, err = parseDateTime(string(v), time.UTC)
+		n.Time, err = parseDateTime(string(v), timeLocation)
 		n.Valid = (err == nil)
 		return err
 	case string:
-		n.Time, err = parseDateTime(v, time.UTC)
+		n.Time, err = parseDateTime(v, timeLocation)
 		n.Valid = (err == nil)
 		return err
 	}
@@ -230,18 +230,18 @@ func parseDateTime(str string, loc *time.Location) (time.Time, error) {
 		if str == base[:len(str)] {
 			return t, err
 		}
-		t, err = time.Parse(timeFormat[:len(str)], str)
+		t, err = time.ParseInLocation(timeFormat[:len(str)], str, loc)
 	default:
 		err = ErrInvalidTimestring
 		return t, err
 	}
 
 	// Adjust location
-	if err == nil && loc != time.UTC {
-		y, mo, d := t.Date()
-		h, mi, s := t.Clock()
-		t, err = time.Date(y, mo, d, h, mi, s, t.Nanosecond(), loc), nil
-	}
+	// if err == nil && loc != time.UTC {
+	// 	y, mo, d := t.Date()
+	// 	h, mi, s := t.Clock()
+	// 	t, err = time.Date(y, mo, d, h, mi, s, t.Nanosecond(), loc), nil
+	// }
 
 	return t, err
 }

@@ -10,10 +10,16 @@ import (
 	"github.com/gaogaogoo/dbr/v2/dialect"
 )
 
+var timeLocation = time.Local
+
 // default is false
 func SetUseUTC(use bool) {
-	dialect.MySQL.UTCTime = use
-	Now.UTCTime = use
+	if use {
+		timeLocation = time.UTC
+	} else {
+		timeLocation = time.Local
+	}
+	dialect.MySQL.TimeLocation = timeLocation
 }
 
 // Open creates a Connection.

@@ -7,7 +7,7 @@ import (
 )
 
 type mysql struct {
-	UTCTime bool
+	TimeLocation *time.Location
 }
 
 func (d mysql) QuoteIdent(s string) string {
@@ -56,8 +56,8 @@ func (d mysql) EncodeBool(b bool) string {
 }
 
 func (d mysql) EncodeTime(t time.Time) string {
-	if d.UTCTime {
-		t = t.UTC()
+	if d.TimeLocation != nil {
+		t = t.In(d.TimeLocation)
 	}
 	return `'` + t.Format(timeFormat) + `'`
 }
