@@ -10,10 +10,15 @@ var Now = nowSentinel{}
 
 const timeFormat = "2006-01-02 15:04:05.000000"
 
-type nowSentinel struct{}
+type nowSentinel struct {
+	UTCTime bool
+}
 
 // Value implements a valuer for compatibility
 func (n nowSentinel) Value() (driver.Value, error) {
-	now := time.Now().Format(timeFormat)
-	return now, nil
+	now := time.Now()
+	if n.UTCTime {
+		now = now.UTC()
+	}
+	return now.Format(timeFormat), nil
 }

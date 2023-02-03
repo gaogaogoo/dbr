@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-type mysql struct{}
+type mysql struct {
+	UTCTime bool
+}
 
 func (d mysql) QuoteIdent(s string) string {
 	return quoteIdent(s, "`")
@@ -54,7 +56,10 @@ func (d mysql) EncodeBool(b bool) string {
 }
 
 func (d mysql) EncodeTime(t time.Time) string {
-	return `'` + t.UTC().Format(timeFormat) + `'`
+	if d.UTCTime {
+		t = t.UTC()
+	}
+	return `'` + t.Format(timeFormat) + `'`
 }
 
 func (d mysql) EncodeBytes(b []byte) string {

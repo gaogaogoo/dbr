@@ -10,6 +10,12 @@ import (
 	"github.com/gaogaogoo/dbr/v2/dialect"
 )
 
+// default is false
+func SetUseUTC(use bool) {
+	dialect.MySQL.UTCTime = use
+	Now.UTCTime = use
+}
+
 // Open creates a Connection.
 // log can be nil to ignore logging.
 func Open(driver, dsn string, log EventReceiver) (*Connection, error) {
