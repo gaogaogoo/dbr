@@ -52,7 +52,7 @@ func (b *InsertStmt) Build(d Dialect, buf Buffer) error {
 		buf.WriteString("INSERT INTO ")
 	}
 
-	buf.WriteString(d.QuoteIdent(b.Table))
+	buf.WriteString(b.Table)
 
 	var placeholderBuf strings.Builder
 	placeholderBuf.WriteString("(")

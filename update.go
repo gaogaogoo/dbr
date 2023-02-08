@@ -44,7 +44,7 @@ func (b *UpdateStmt) Build(d Dialect, buf Buffer) error {
 	}
 
 	buf.WriteString("UPDATE ")
-	buf.WriteString(d.QuoteIdent(b.Table))
+	buf.WriteString(b.Table)
 	for _, hint := range b.indexHints {
 		buf.WriteString(" ")
 		if err := hint.Build(d, buf); err != nil {

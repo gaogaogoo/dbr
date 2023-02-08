@@ -38,7 +38,7 @@ func (b *DeleteStmt) Build(d Dialect, buf Buffer) error {
 	}
 
 	buf.WriteString("DELETE FROM ")
-	buf.WriteString(d.QuoteIdent(b.Table))
+	buf.WriteString(b.Table)
 
 	if len(b.WhereCond) > 0 {
 		buf.WriteString(" WHERE ")
